@@ -13,19 +13,24 @@ extended with:
 
 ## Syntax
 ```haskell
+-- Bind
+b ::= x = t 
+
+-- Term
 t ::= x
     | λx: T. t
-    | \x: T. t -- same with using λ
+    | \x: T. t -- same with using λ.
     | t1 t2
     | (t)
     | true
     | false
-    | n -- natural number
+    | n -- natural number.
     | succ t
     | pred t
     | iszero t
     | if t1 then t2 else t3
 
+-- Type
 T ::= bool | nat | T1 -> T2
 ```
 
