@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 module Parser(theParser) where
 
-import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum, digit, many1)
+import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum)
 import Text.Parsec (Parsec, ParseError, try)
 import Types
 import Control.Monad (void)
