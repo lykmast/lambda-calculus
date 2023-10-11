@@ -27,7 +27,6 @@ library
   exposed-modules:
       Environment
       Eval
-      Lib
       Parser
       PPrint
       Typecheck
