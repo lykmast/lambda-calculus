@@ -7,6 +7,7 @@ import GHC.IO.Handle (hFlush)
 import System.IO (stdout)
 import Typecheck(typecheckTop)
 import Environment(Environment, envInsert, emptyEnv)
+import Data.Bifunctor(first)
 import Types
 
 main :: IO ()
@@ -25,7 +26,6 @@ repl env = do
     Right top ->
       case handleTop top of
         Left e -> do
-          putStrLn "Type error:"
           putStrLn e
           repl env
         Right (ty, res, newEnv) -> do
@@ -37,10 +37,10 @@ repl env = do
   where
     handleTop :: TopLevel -> Either String (Type, Term, Environment)
     handleTop (Left t) = do
-      ty  <- typecheckTop env t 
-      let res = evalWithEnv env t
+      ty  <- first ("Type error:\n" ++ ) $ typecheckTop env t 
+      res <- first ("Eval error:\n" ++ ) $ evalWithEnv env t
       return (ty, res, env)
     handleTop (Right (x, t)) = do
-      ty  <- typecheckTop env t 
-      let res = evalWithEnv env t
+      ty  <- first ("Type error:\n" ++ ) $ typecheckTop env t 
+      res <- first ("Eval error:\n" ++ ) $ evalWithEnv env t
       return (ty, res, envInsert x (ty, res) env)

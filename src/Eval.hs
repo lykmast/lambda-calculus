@@ -1,5 +1,6 @@
 module Eval(eval, evalWithEnv) where
 import Types
+import PPrint (qshow)
 import Util (Var)
 import Environment(Environment, envLookup)
 
@@ -32,38 +33,47 @@ eval t@ConstB{} = t
 eval t@ConstN{} = t
 
 
-evalWithEnv :: Environment -> Term -> Term
+evalWithEnv :: Environment -> Term -> Either String Term
 evalWithEnv env = go
   where 
     go t@(Var x) = 
       case envLookup env x of
         Just (_ty, t') -> go t'
-        Nothing -> t
-    go (App t1 t2) =
-      case (go t1, go t2) of
+        Nothing -> Left $ "Unbound variable " ++ qshow t ++ "'."
+    go (App t1 t2) = do
+      v1 <- go t1
+      v2 <- go t2
+      case (v1, v2) of
         (Abs x _ty t, yterm) -> go (replace x yterm t)
-        (t1', t2')           -> App t1' t2'
-    go (IfThenElse t1 t2 t3) =
-      case go t1 of
+        (t1', t2')           -> Left $ evalErrMsg (App t1' t2')
+    go (IfThenElse t1 t2 t3) = do
+      v1 <- go t1
+      case v1 of
         ConstB ConstTrue -> go t2
         ConstB ConstFalse -> go t3
-        t1' -> IfThenElse t1' t2 t3
-    go (Succ t) = 
-      case go t of
-        ConstN n -> ConstN (n + 1)
-        v        -> Succ v 
-    go (Pred t) =
-        case go t of
-          ConstN n | n > 0 -> ConstN (n - 1)
-          v -> Pred v
-    go (IsZero t) =
-        case go t of
-          ConstN 0 -> ConstB ConstTrue
-          ConstN _ -> ConstB ConstFalse
-          v        -> IsZero v
-    go t@ConstB{} = t
-    go t@ConstN{} = t
-    go t@Abs{}    = t
+        _ -> Left $ evalErrMsg (IfThenElse v1 t2 t3)
+    go (Succ t) = do
+      v <- go t
+      case v of
+        ConstN n -> Right $ ConstN (n + 1)
+        _        -> Left  $ evalErrMsg (Succ v) 
+    go (Pred t) = do
+      v <- go t
+      case v of
+        ConstN n | n > 0 -> Right $ ConstN (n - 1)
+        _ -> Left $ evalErrMsg (Pred v)
+    go (IsZero t) = do
+      v <- go t
+      case v of
+        ConstN 0 -> Right $ ConstB ConstTrue
+        ConstN _ -> Right $ ConstB ConstFalse
+        _        -> Left $ evalErrMsg (IsZero v)
+    go t@ConstB{} = Right t
+    go t@ConstN{} = Right t
+    go t@Abs{}    = Right t
+
+evalErrMsg :: Term -> String
+evalErrMsg t = "Can't evaluate " ++ qshow t ++ "." 
 
 replace :: Var -> Term -> Term -> Term
 replace x yterm (Var x')
