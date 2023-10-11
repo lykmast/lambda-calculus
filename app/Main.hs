@@ -1,7 +1,7 @@
 module Main (main) where
 
 import PPrint(pprint)
-import Eval (evalWithEnv)
+import Eval (eval)
 import Parser(theParser)
 import GHC.IO.Handle (hFlush)
 import System.IO (stdout)
@@ -38,9 +38,9 @@ repl env = do
     handleTop :: TopLevel -> Either String (Type, Term, Environment)
     handleTop (Left t) = do
       ty  <- first ("Type error:\n" ++ ) $ typecheckTop env t 
-      res <- first ("Eval error:\n" ++ ) $ evalWithEnv env t
+      res <- first ("Eval error:\n" ++ ) $ eval env t
       return (ty, res, env)
     handleTop (Right (x, t)) = do
       ty  <- first ("Type error:\n" ++ ) $ typecheckTop env t 
-      res <- first ("Eval error:\n" ++ ) $ evalWithEnv env t
+      res <- first ("Eval error:\n" ++ ) $ eval env t
       return (ty, res, envInsert x (ty, res) env)

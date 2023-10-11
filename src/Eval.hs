@@ -1,40 +1,11 @@
-module Eval(eval, evalWithEnv) where
+module Eval(eval) where
 import Types
 import PPrint (qshow)
 import Util (Var)
 import Environment(Environment, envLookup)
 
-eval :: Term -> Term
-eval t@Abs{} = t
-eval (App t1 t2) =
-  case (eval t1, eval t2) of
-    (Abs x _ty t, yterm) -> eval (replace x yterm t)
-    (t1', t2')           -> App t1' t2'
-eval (IfThenElse t1 t2 t3) =
-  case eval t1 of
-    ConstB ConstTrue -> eval t2
-    ConstB ConstFalse -> eval t3
-    t1' -> IfThenElse t1' t2 t3
-eval (Succ t) = 
-  case eval t of
-    ConstN n -> ConstN (n + 1)
-    v        -> Succ v 
-eval (Pred t) =
-    case eval t of
-      ConstN n | n > 0 -> ConstN (n - 1)
-      v -> Pred v
-eval (IsZero t) =
-    case eval t of
-      ConstN 0 -> ConstB ConstTrue
-      ConstN _ -> ConstB ConstFalse
-      v        -> IsZero v
-eval t@Var{} = t
-eval t@ConstB{} = t
-eval t@ConstN{} = t
-
-
-evalWithEnv :: Environment -> Term -> Either String Term
-evalWithEnv env = go
+eval :: Environment -> Term -> Either String Term
+eval env = go
   where 
     go t@(Var x) = 
       case envLookup env x of
