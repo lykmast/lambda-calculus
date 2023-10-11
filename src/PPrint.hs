@@ -1,4 +1,4 @@
-module PPrint(pshow, pprint) where
+module PPrint(pshow, pprint, qshow) where
 import Types
 
 class PPrint a where
@@ -43,3 +43,6 @@ pshowArr1 :: Type -> String
 pshowArr1 t@Arr{}  = parenthesize (pshow t)
 pshowArr1 t@TVar{} = pshow t
 pshowArr1 t@Base{} = pshow t
+
+qshow :: PPrint a => a -> String
+qshow t = "'" ++ pshow t ++ "'"
