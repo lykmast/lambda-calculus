@@ -8,7 +8,7 @@ Developed while reading through
 The interpreter currently supports terms of the 
 [simply typed lambda calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus) 
 extended with:
-- `bool`s and `nat`s
+- `bool`s, `nat`s and `unit`
 - top level bindings, in the form: `x = t`
 
 ## Syntax

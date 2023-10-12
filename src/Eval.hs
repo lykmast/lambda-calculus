@@ -41,6 +41,7 @@ eval env = go
     go t@ConstB{} = Right t
     go t@ConstN{} = Right t
     go t@Abs{}    = Right t
+    go t@Unit     = Right t
 
 evalErrMsg :: Term -> String
 evalErrMsg t = "Can't evaluate " ++ qshow t ++ "." 
@@ -61,3 +62,4 @@ replace x yterm (Pred t) = Pred (replace x yterm t)
 replace x yterm (IsZero t) = IsZero (replace x yterm t)
 replace _x _yterm t@ConstB{} = t
 replace _x _yterm t@ConstN{} = t
+replace _x _yterm t@Unit     = t

@@ -18,17 +18,24 @@ instance PPrint Term where
   pshow (Succ t) = "succ " ++ pshowApp2 t
   pshow (Pred t) = "pred " ++ pshowApp2 t
   pshow (IsZero t) = "iszero " ++ pshowApp2 t
+  pshow Unit = "unit"
   
 pshowApp1 :: Term -> String
 pshowApp1 t@Abs{}        = parenthesize (pshow t)
 pshowApp1 t@IfThenElse{} = parenthesize (pshow t)
+pshowApp1 t@Succ{}       = parenthesize (pshow t)
+pshowApp1 t@Pred{}       = parenthesize (pshow t)
+pshowApp1 t@IsZero{}     = parenthesize (pshow t)
 pshowApp1 t              = pshow t
 
 pshowApp2 :: Term -> String
-pshowApp2 t@Var{}    = pshow t
-pshowApp2 t@ConstB{} = pshow t
-pshowApp2 t@ConstN{} = pshow t
-pshowApp2 t          = parenthesize (pshow t)
+pshowApp2 t@Abs{}        = parenthesize (pshow t)
+pshowApp2 t@App{}        = parenthesize (pshow t)
+pshowApp2 t@IfThenElse{} = parenthesize (pshow t)
+pshowApp2 t@Succ{}       = parenthesize (pshow t)
+pshowApp2 t@Pred{}       = parenthesize (pshow t)
+pshowApp2 t@IsZero{}     = parenthesize (pshow t)
+pshowApp2 t              = pshow t
 
 parenthesize :: String -> String
 parenthesize str = "(" ++ str ++ ")"
@@ -38,6 +45,7 @@ instance PPrint Type where
   pshow (Arr t1 t2)  = pshowArr1 t1 ++ " -> " ++ pshow t2
   pshow (Base BoolT) = "bool"
   pshow (Base NatT)  = "nat"
+  pshow (Base UnitT)  = "unit"
 
 pshowArr1 :: Type -> String
 pshowArr1 t@Arr{}  = parenthesize (pshow t)

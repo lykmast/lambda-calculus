@@ -9,7 +9,7 @@ data Type =
   | Base BaseType
   deriving (Read, Show)
 
-data BaseType = BoolT | NatT
+data BaseType = BoolT | NatT | UnitT
   deriving (Read, Show)
 
 data Term =
@@ -22,6 +22,7 @@ data Term =
   | Pred Term
   | Succ Term
   | IsZero Term
+  | Unit
   deriving (Read, Show)
 
 type ConstNat = Int

@@ -17,7 +17,7 @@ lambdaCalculusDefinition =
   emptyDef {
     P.identStart = letter <|> char '_' ,
     P.identLetter = alphaNum <|> char '_' <|> char '\'',
-    P.reservedNames = ["if", "then", "else", "bool", "true", "false", "nat", "succ", "pred", "iszero"],
+    P.reservedNames = ["if", "then", "else", "bool", "true", "false", "nat", "succ", "pred", "iszero", "unit"],
     P.reservedOpNames = ["->", ".", ":", "λ", "\\", "="]
   }
 
@@ -52,6 +52,7 @@ parseNonApp :: Parser Term
 parseNonApp = 
       parseConstB
   <|> parseConstN 
+  <|> parseUnit
   <|> parseSucc
   <|> parsePred
   <|> parseIsZero
@@ -86,6 +87,9 @@ parseConstB =
       reserved "true"  $> ConstB ConstTrue
   <|> reserved "false" $> ConstB ConstFalse
 
+parseUnit :: Parser Term
+parseUnit = reserved "unit" $> Unit
+
 parseConstN :: Parser Term
 parseConstN = ConstN . fromInteger <$> P.natural lexer
 
@@ -113,4 +117,7 @@ parseTVar :: Parser Type
 parseTVar = TVar <$> parseVarName
 
 parseBase :: Parser Type
-parseBase = reserved "bool" $> Base BoolT <|> reserved "nat" $> Base NatT
+parseBase =
+      reserved "bool" $> Base BoolT
+  <|> reserved "nat"  $> Base NatT
+  <|> reserved "unit" $> Base UnitT
