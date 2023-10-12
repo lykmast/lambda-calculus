@@ -63,14 +63,12 @@ typecheck _c Unit = Right (Base UnitT)
 
 
 typeEq :: Context -> Type -> Type -> Bool
-typeEq _c (TVar _) _ = True -- x == y || any isNothing (M.lookup c <$> [x,y])
-typeEq _c _ (TVar _) = True
-typeEq c (Arr t11 t12) (Arr t21 t22) = typeEq c t11 t21 && typeEq c t12 t22
-typeEq _c (Base BoolT) (Base BoolT) = True
-typeEq _c (Base NatT) (Base NatT) = True
-typeEq _c (Base UnitT) (Base UnitT) = True
+typeEq c  (Arr t11 t12) (Arr t21 t22) = typeEq c t11 t21 && typeEq c t12 t22
+typeEq _c (Base BoolT)  (Base BoolT)  = True
+typeEq _c (Base NatT)   (Base NatT)   = True
+typeEq _c (Base UnitT)  (Base UnitT)  = True
 
-typeEq _c (Base BoolT) _ = False
-typeEq _c (Base NatT)  _ = False
-typeEq _c (Base UnitT) _ = False
-typeEq _c Arr{}        _ = False
+typeEq _c (Base BoolT)   _            = False
+typeEq _c (Base NatT)    _            = False
+typeEq _c (Base UnitT)   _            = False
+typeEq _c Arr{}          Base{}       = False

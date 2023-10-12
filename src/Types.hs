@@ -5,7 +5,6 @@ type Var = String
 
 data Type =
     Arr Type Type 
-  | TVar Var
   | Base BaseType
   deriving (Read, Show)
 

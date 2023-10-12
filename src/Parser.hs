@@ -111,10 +111,7 @@ parseType  = chainr1 parseNonArrow $ do
   return Arr
 
 parseNonArrow :: Parser Type
-parseNonArrow = parens parseType <|> parseBase <|> parseTVar
-
-parseTVar :: Parser Type
-parseTVar = TVar <$> parseVarName
+parseNonArrow = parens parseType <|> parseBase
 
 parseBase :: Parser Type
 parseBase =
