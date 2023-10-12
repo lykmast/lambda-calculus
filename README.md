@@ -8,7 +8,7 @@ Developed while reading through
 The interpreter currently supports terms of the 
 [simply typed lambda calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus) 
 extended with:
-- `bool`s, `nat`s and `unit`
+- `Bool`s, `Nat`s and `Unit`
 - top level bindings, in the form: `x = t`
 
 ## Syntax
@@ -31,7 +31,7 @@ t ::= x
     | if t1 then t2 else t3
 
 -- Type
-T ::= bool | nat | T1 -> T2
+T ::= Bool | Nat | Unit | T1 -> T2
 ```
 
 ## Interface
@@ -40,15 +40,15 @@ Apart from the evaluation of the term, the repl also prints out the term's type.
 
 #### Example
 ```
-λ> \x:nat. x
-λx: nat. x
-:: nat -> nat
-λ> idBool = \x:bool.x   
-λx: bool. x
-:: bool -> bool
+λ> \x:Nat. x
+λx: Nat. x
+:: Nat -> Nat
+λ> idBool = \x:Bool.x   
+λx: Bool. x
+:: Bool -> Bool
 λ> idBool true
 true
-:: bool
+:: Bool
 ```
 
 ## Build/Run Instructions

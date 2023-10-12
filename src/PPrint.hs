@@ -43,9 +43,9 @@ parenthesize str = "(" ++ str ++ ")"
 instance PPrint Type where
   pshow (TVar x)     = x
   pshow (Arr t1 t2)  = pshowArr1 t1 ++ " -> " ++ pshow t2
-  pshow (Base BoolT) = "bool"
-  pshow (Base NatT)  = "nat"
-  pshow (Base UnitT)  = "unit"
+  pshow (Base BoolT) = "Bool"
+  pshow (Base NatT)  = "Nat"
+  pshow (Base UnitT)  = "Unit"
 
 pshowArr1 :: Type -> String
 pshowArr1 t@Arr{}  = parenthesize (pshow t)
