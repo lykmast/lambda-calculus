@@ -5,7 +5,6 @@ import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, ch
 import Text.Parsec (Parsec, ParseError, try)
 import Types
 import Control.Monad (void)
-import Util(Var)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
 import Data.Functor (($>))

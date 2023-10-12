@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 module Types where
-import Util(Var)
+
+type Var = String
 
 data Type =
     Arr Type Type 

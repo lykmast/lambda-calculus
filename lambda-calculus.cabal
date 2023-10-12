@@ -31,7 +31,6 @@ library
       PPrint
       Typecheck
       Types
-      Util
   other-modules:
       Paths_lambda_calculus
   hs-source-dirs:

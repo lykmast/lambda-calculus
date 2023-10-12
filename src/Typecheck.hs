@@ -1,8 +1,6 @@
 module Typecheck(typecheck, typecheckTop) where
 
-
 import qualified Data.Map as M
-import Util(Var, )
 import Environment(Environment)
 import Types
 import PPrint (qshow)

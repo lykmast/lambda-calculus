@@ -1,7 +1,6 @@
 module Eval(eval) where
 import Types
 import PPrint (qshow)
-import Util (Var)
 import Environment(Environment, envLookup)
 
 eval :: Environment -> Term -> Either String Term
