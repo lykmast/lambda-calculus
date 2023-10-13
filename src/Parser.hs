@@ -36,7 +36,7 @@ parens :: Parser a -> Parser a
 parens = P.parens lexer
 
 parseTopLevel :: Parser TopLevel
-parseTopLevel = Right <$> try parseBinding <|> Left <$> parseTerm
+parseTopLevel = Right <$> try parseBinding <|> Left <$> parseTermSeq
 
 parseBinding :: Parser Binding
 parseBinding = do
@@ -44,6 +44,9 @@ parseBinding = do
   reservedOp "="
   t <- parseTerm
   return (x,t)
+
+parseTermSeq :: Parser Term
+parseTermSeq = chainl1 parseTerm (reservedOp ";" $> Seq)
 
 parseTerm :: Parser Term
 parseTerm = chainl1 parseNonApp (return App)
@@ -59,7 +62,7 @@ parseNonApp =
   <|> parseIfThenElse
   <|> parseAbs
   <|> parseVar
-  <|> parens parseTerm 
+  <|> parens parseTermSeq
 
 parseIfThenElse :: Parser Term
 parseIfThenElse = do

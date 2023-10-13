@@ -30,6 +30,13 @@ typecheck c (App t1 t2)  = do
       Arr ty11 ty12 | typeEq c ty11 ty2 -> return ty12
       _ -> Left $ "Term " ++ qshow t1  ++ " with type " ++ qshow ty1 ++ 
                   " cannot be applied to " ++ qshow t2  ++ " with type " ++ qshow ty2  ++ "."  
+typecheck c t@(Seq t1 t2) = do
+  ty1 <- typecheck c t1
+  ty2 <- typecheck c t2
+  case ty1 of
+    Base UnitT -> Right ty2
+    _          -> Left $ "Term " ++ qshow t1 ++ " should be of type " ++
+                          qshow (Base UnitT) ++ " in " ++ qshow t ++ "."
 typecheck _c (ConstB _) = Right (Base BoolT)
 typecheck _c (ConstN _) = Right (Base NatT)
 typecheck c t@(IfThenElse t1 t2 t3) = do

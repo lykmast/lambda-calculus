@@ -14,6 +14,7 @@ data BaseType = BoolT | NatT | UnitT
 data Term =
     Abs Var Type Term
   | App Term Term
+  | Seq Term Term
   | Var Var
   | ConstB ConstBool
   | ConstN ConstNat

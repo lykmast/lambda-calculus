@@ -10,6 +10,7 @@ class PPrint a where
 instance PPrint Term where
   pshow (Abs x ty t) = "λ" ++ x ++ ": " ++ pshow ty ++ ". " ++ pshow t
   pshow (App x y)     = pshowApp1 x ++ " " ++ pshowApp2 y
+  pshow (Seq x y)     = pshow x ++ "; " ++ pshow y
   pshow (Var x)       = x
   pshow (ConstB ConstTrue) = "true"
   pshow (ConstB ConstFalse) = "false"

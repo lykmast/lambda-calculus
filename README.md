@@ -21,6 +21,7 @@ t ::= x
     | λx: T. t
     | \x: T. t -- same with using λ.
     | t1 t2
+    | t1; t2
     | (t)
     | true
     | false

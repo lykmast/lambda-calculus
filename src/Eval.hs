@@ -5,8 +5,8 @@ import Environment(Environment, envLookup)
 
 eval :: Environment -> Term -> Either String Term
 eval env = go
-  where 
-    go t@(Var x) = 
+  where
+    go t@(Var x) =
       case envLookup env x of
         Just (_ty, t') -> go t'
         Nothing -> Left $ "Unbound variable " ++ qshow t ++ "'."
@@ -16,6 +16,11 @@ eval env = go
       case (v1, v2) of
         (Abs x _ty t, yterm) -> go (replace x yterm t)
         (t1', t2')           -> Left $ evalErrMsg (App t1' t2')
+    go (Seq t1 t2) = do
+      v1 <- go t1
+      case v1 of 
+        Unit -> go t2
+        _    -> Left $ evalErrMsg (Seq v1 t2)
     go (IfThenElse t1 t2 t3) = do
       v1 <- go t1
       case v1 of
@@ -26,7 +31,7 @@ eval env = go
       v <- go t
       case v of
         ConstN n -> Right $ ConstN (n + 1)
-        _        -> Left  $ evalErrMsg (Succ v) 
+        _        -> Left  $ evalErrMsg (Succ v)
     go (Pred t) = do
       v <- go t
       case v of
@@ -44,7 +49,7 @@ eval env = go
     go t@Unit     = Right t
 
 evalErrMsg :: Term -> String
-evalErrMsg t = "Can't evaluate " ++ qshow t ++ "." 
+evalErrMsg t = "Can't evaluate " ++ qshow t ++ "."
 
 replace :: Var -> Term -> Term -> Term
 replace x yterm (Var x')
@@ -55,6 +60,8 @@ replace x yterm (Abs x' ty t)
   | otherwise = Abs x' ty (replace x yterm t)
 replace x yterm (App t1 t2) =
     App (replace x yterm t1) (replace x yterm t2)
+replace x yterm (Seq t1 t2) =
+    Seq (replace x yterm t1) (replace x yterm t2)
 replace x yterm (IfThenElse t1 t2 t3) =
     IfThenElse (replace x yterm t1) (replace x yterm t2) (replace x yterm t3)
 replace x yterm (Succ t) = Succ (replace x yterm t)
