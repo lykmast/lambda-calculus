@@ -43,7 +43,8 @@ T ::= Bool | Nat | Unit | T1 -> T2
 You can interface with the interpreter through a simple repl.
 Apart from the evaluation of the term, the repl also prints out the term's type.
 
-#### Example
+#### Examples
+- `Nats` and `Bool`s:
 ```
 λ> \x:Nat. x
 λx: Nat. x
@@ -56,5 +57,27 @@ true
 :: Bool
 ```
 
+- `Unit` and wildcard:
+```
+λ> \_:Unit.unit
+λ_: Unit. unit
+:: Unit -> Unit
+λ> (\_:Unit. \x:Unit -> Bool. x unit) unit
+λx: Unit -> Bool. x unit
+:: (Unit -> Bool) -> Bool
+λ> (\_:Unit. \x:Unit -> Bool. x unit) unit (\_:Unit. true)
+true
+:: Bool
+```
+
+- Sequence expressions:
+```
+λ> \x:Unit.x;true
+Type error:
+Term 'λx: Unit. x' should be of type 'Unit' in 'λx: Unit. x; true'.
+λ> (\x:Unit.x) unit; true
+true
+:: Bool
+```
 ## Build/Run Instructions
 Just run `stack run` in the root directory. If you want to just build the project you can run `stack build` instead.
