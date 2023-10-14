@@ -8,7 +8,7 @@ import System.IO (stdout)
 import Typecheck(typecheckTop)
 import Environment(Environment, envInsert, emptyEnv)
 import Data.Bifunctor(first)
-import Types
+import Syntax
 
 main :: IO ()
 main = repl emptyEnv

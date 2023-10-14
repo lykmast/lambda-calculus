@@ -1,5 +1,5 @@
 module Eval(eval) where
-import Types
+import Syntax
 import PPrint (qshow)
 import Environment(Environment, envLookup)
 

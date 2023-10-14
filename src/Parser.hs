@@ -3,7 +3,7 @@ module Parser(theParser) where
 
 import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum)
 import Text.Parsec (Parsec, ParseError, try)
-import Types
+import Syntax
 import Control.Monad (void)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)

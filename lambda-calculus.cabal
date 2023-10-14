@@ -29,8 +29,8 @@ library
       Eval
       Parser
       PPrint
+      Syntax
       Typecheck
-      Types
   other-modules:
       Paths_lambda_calculus
   hs-source-dirs:

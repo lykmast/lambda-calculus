@@ -1,7 +1,7 @@
 module Environment(Environment, envLookup, envInsert, emptyEnv) where
 
 import qualified Data.Map as M
-import Types(Type, Term, Var)
+import Syntax(Type, Term, Var)
 
 type Environment = M.Map Var (Type, Term)
 

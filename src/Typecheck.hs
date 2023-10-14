@@ -2,7 +2,7 @@ module Typecheck(typecheck, typecheckTop) where
 
 import qualified Data.Map as M
 import Environment(Environment)
-import Types
+import Syntax
 import PPrint (qshow)
 -- import Data.Maybe (isNothing)
 type Context = M.Map Var Type

@@ -1,5 +1,5 @@
 module PPrint(pshow, pprint, qshow) where
-import Types
+import Syntax
 
 class PPrint a where
   pshow :: a -> String
