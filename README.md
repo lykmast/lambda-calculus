@@ -21,6 +21,7 @@ t ::= x
     | λp: T. t
     | \p: T. t -- same with using λ.
     | t1 t2
+    | t as T
     | t1; t2
     | (t)
     | true
@@ -77,6 +78,28 @@ Type error:
 Term 'λx: Unit. x' should be of type 'Unit' in 'λx: Unit. x; true'.
 λ> (\x:Unit.x) unit; true
 true
+:: Bool
+```
+
+- Type ascription:
+```
+λ> x = \x:Bool. unit as Unit
+λx: Bool. unit as Unit
+:: Bool -> Unit
+λ> x true as Unit
+unit
+:: Unit
+λ> x (true as Unit)
+Type error:
+Term 'true'cannot be ascribed with type 'Unit'.
+λ> (\x:Bool. unit) as Bool -> Unit
+λx: Bool. unit
+:: Bool -> Unit
+λ> if true then 3 as Nat else 1 as Nat
+3
+:: Nat
+λ> unit; iszero 3 as Bool
+false
 :: Bool
 ```
 ## Build/Run Instructions

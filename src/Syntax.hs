@@ -15,6 +15,7 @@ data Term =
     Abs Pattern Type Term
   | App Term Term
   | Seq Term Term
+  | As  Term Type
   | Var Var
   | ConstB ConstBool
   | ConstN ConstNat

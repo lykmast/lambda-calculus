@@ -9,9 +9,10 @@ class PPrint a where
 
 instance PPrint Term where
   pshow (Abs x ty t) = "λ" ++ pshow x ++ ": " ++ pshow ty ++ ". " ++ pshow t
-  pshow (App x y)     = pshowApp1 x ++ " " ++ pshowApp2 y
-  pshow (Seq x y)     = pshow x ++ "; " ++ pshow y
-  pshow (Var x)       = x
+  pshow (App x y)    = pshowApp1 x ++ " " ++ pshowApp2 y
+  pshow (Seq x y)    = pshow x ++ "; " ++ pshow y
+  pshow (As t ty)    = pshowAs1 t ++ " as " ++ pshow ty 
+  pshow (Var x)      = x
   pshow (ConstB ConstTrue) = "true"
   pshow (ConstB ConstFalse) = "false"
   pshow (IfThenElse t1 t2 t3) = "if " ++ pshow t1 ++ " then " ++ pshow t2 ++ " else " ++ pshow t3
@@ -20,7 +21,12 @@ instance PPrint Term where
   pshow (Pred t) = "pred " ++ pshowApp2 t
   pshow (IsZero t) = "iszero " ++ pshowApp2 t
   pshow Unit = "unit"
-  
+
+pshowAs1 :: Term -> String
+pshowAs1 t@Abs{}        = parenthesize (pshow t)
+pshowAs1 t@IfThenElse{} = parenthesize (pshow t)
+pshowAs1 t              = pshow t
+
 pshowApp1 :: Term -> String
 pshowApp1 t@Abs{}        = parenthesize (pshow t)
 pshowApp1 t@IfThenElse{} = parenthesize (pshow t)
@@ -32,6 +38,7 @@ pshowApp1 t              = pshow t
 pshowApp2 :: Term -> String
 pshowApp2 t@Abs{}        = parenthesize (pshow t)
 pshowApp2 t@App{}        = parenthesize (pshow t)
+pshowApp2 t@As{}         = parenthesize (pshow t)
 pshowApp2 t@IfThenElse{} = parenthesize (pshow t)
 pshowApp2 t@Succ{}       = parenthesize (pshow t)
 pshowApp2 t@Pred{}       = parenthesize (pshow t)

@@ -41,6 +41,11 @@ typecheck c t@(Seq t1 t2) = do
     Base UnitT -> Right ty2
     _          -> Left $ "Term " ++ qshow t1 ++ " should be of type " ++
                           qshow (Base UnitT) ++ " in " ++ qshow t ++ "."
+typecheck c (As t1 ty) = do
+  ty1 <- typecheck c t1
+  if typeEq c ty1 ty
+    then return ty
+    else Left $ "Term " ++ qshow t1 ++ " cannot be ascribed with type " ++ qshow ty ++ "."
 typecheck _c (ConstB _) = Right (Base BoolT)
 typecheck _c (ConstN _) = Right (Base NatT)
 typecheck c t@(IfThenElse t1 t2 t3) = do

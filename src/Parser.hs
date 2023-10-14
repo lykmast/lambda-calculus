@@ -17,7 +17,7 @@ lambdaCalculusDefinition =
   emptyDef {
     P.identStart = letter <|> char '_' ,
     P.identLetter = alphaNum <|> char '_' <|> char '\'',
-    P.reservedNames = ["if", "then", "else", "true", "false", "succ", "pred", "iszero", "unit", "Bool", "Nat", "Unit", "_"],
+    P.reservedNames = ["if", "then", "else", "true", "false", "succ", "pred", "iszero", "unit", "Bool", "Nat", "Unit", "as", "_"],
     P.reservedOpNames = ["->", ".", ":", "λ", "\\", "="]
   }
 
@@ -36,25 +36,31 @@ parens :: Parser a -> Parser a
 parens = P.parens lexer
 
 parseTopLevel :: Parser TopLevel
-parseTopLevel = Right <$> try parseBinding <|> Left <$> parseTermSeq
+parseTopLevel = Right <$> try parseBinding <|> Left <$> parseTerm0
 
 parseBinding :: Parser Binding
 parseBinding = do
   x <- parseVarName
   reservedOp "="
-  t <- parseTerm
+  t <- parseTerm2
   return (x,t)
 
-parseTermSeq :: Parser Term
-parseTermSeq = chainl1 parseTerm (reservedOp ";" $> Seq)
+parseTerm0 :: Parser Term
+parseTerm0 = chainl1 parseTerm1 (reservedOp ";" $> Seq)
 
-parseTerm :: Parser Term
-parseTerm = chainl1 parseNonApp (return App)
+parseTerm1 :: Parser Term
+parseTerm1 = try parseAs <|> parseTerm2
+
+parseAs :: Parser Term
+parseAs = As <$> parseTerm2 <* reserved "as" <*> parseType
+
+parseTerm2 :: Parser Term
+parseTerm2 = chainl1 parseNonApp (return App)
 
 parseNonApp :: Parser Term
-parseNonApp = 
+parseNonApp =
       parseConstB
-  <|> parseConstN 
+  <|> parseConstN
   <|> parseUnit
   <|> parseSucc
   <|> parsePred
@@ -62,25 +68,25 @@ parseNonApp =
   <|> parseIfThenElse
   <|> parseAbs
   <|> parseVar
-  <|> parens parseTermSeq
+  <|> parens parseTerm0
 
 parseIfThenElse :: Parser Term
 parseIfThenElse = do
   reserved "if"
-  t1 <- parseTerm
+  t1 <- parseTerm1
   reserved "then"
-  t2 <- parseTerm
+  t2 <- parseTerm1
   reserved "else"
-  IfThenElse t1 t2 <$> parseTerm
+  IfThenElse t1 t2 <$> parseTerm1
 
 parseSucc :: Parser Term
-parseSucc = reserved "succ" *> (Succ <$> parseTerm)
+parseSucc = reserved "succ" *> (Succ <$> parseTerm2)
 
 parsePred :: Parser Term
-parsePred = reserved "pred" *> (Pred <$> parseTerm)
+parsePred = reserved "pred" *> (Pred <$> parseTerm2)
 
 parseIsZero :: Parser Term
-parseIsZero = reserved "iszero" *> (IsZero <$> parseTerm)
+parseIsZero = reserved "iszero" *> (IsZero <$> parseTerm2)
 
 parseVar :: Parser Term
 parseVar = Var <$> parseVarName
@@ -106,7 +112,7 @@ parseAbs = do
     void $ reservedOp ":"
     t <- parseType
     void $ reservedOp "."
-    Abs x t <$> parseTerm
+    Abs x t <$> parseTerm1
   where
     lambdaOp :: Parser ()
     lambdaOp = void $ reservedOp "λ" <|> reservedOp "\\"
