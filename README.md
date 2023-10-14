@@ -18,8 +18,8 @@ b ::= x = t
 
 -- Term
 t ::= x
-    | λx: T. t
-    | \x: T. t -- same with using λ.
+    | λp: T. t
+    | \p: T. t -- same with using λ.
     | t1 t2
     | t1; t2
     | (t)
@@ -30,6 +30,10 @@ t ::= x
     | pred t
     | iszero t
     | if t1 then t2 else t3
+
+-- Pattern
+p ::= x
+    | _
 
 -- Type
 T ::= Bool | Nat | Unit | T1 -> T2

@@ -8,7 +8,7 @@ class PPrint a where
   pprint = putStr . pshow
 
 instance PPrint Term where
-  pshow (Abs x ty t) = "λ" ++ x ++ ": " ++ pshow ty ++ ". " ++ pshow t
+  pshow (Abs x ty t) = "λ" ++ pshow x ++ ": " ++ pshow ty ++ ". " ++ pshow t
   pshow (App x y)     = pshowApp1 x ++ " " ++ pshowApp2 y
   pshow (Seq x y)     = pshow x ++ "; " ++ pshow y
   pshow (Var x)       = x
@@ -53,3 +53,7 @@ pshowArr1 t@Base{} = pshow t
 
 qshow :: PPrint a => a -> String
 qshow t = "'" ++ pshow t ++ "'"
+
+instance PPrint Pattern where
+  pshow (Identifier x) = x
+  pshow Wildcard       = "_"

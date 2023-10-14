@@ -22,7 +22,11 @@ typecheck c (Var x) =
     case M.lookup x c of
       Just t -> Right t
       Nothing -> Left $ "No " ++ qshow (Var x)  ++ " in type context."
-typecheck c (Abs x ty t) = Arr ty <$> typecheck (M.insert x ty c) t
+typecheck c (Abs x ty t) =
+  let c' =  case x of
+              Identifier name -> M.insert name ty c
+              Wildcard        -> c
+  in Arr ty <$> typecheck c' t
 typecheck c (App t1 t2)  = do
     ty1 <- typecheck c t1
     ty2 <- typecheck c t2

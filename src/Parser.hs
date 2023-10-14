@@ -17,7 +17,7 @@ lambdaCalculusDefinition =
   emptyDef {
     P.identStart = letter <|> char '_' ,
     P.identLetter = alphaNum <|> char '_' <|> char '\'',
-    P.reservedNames = ["if", "then", "else", "true", "false", "succ", "pred", "iszero", "unit", "Bool", "Nat", "Unit"],
+    P.reservedNames = ["if", "then", "else", "true", "false", "succ", "pred", "iszero", "unit", "Bool", "Nat", "Unit", "_"],
     P.reservedOpNames = ["->", ".", ":", "λ", "\\", "="]
   }
 
@@ -96,10 +96,13 @@ parseUnit = reserved "unit" $> Unit
 parseConstN :: Parser Term
 parseConstN = ConstN . fromInteger <$> P.natural lexer
 
+parsePattern :: Parser Pattern
+parsePattern = Wildcard <$ reserved "_" <|> Identifier <$> parseVarName
+
 parseAbs :: Parser Term
 parseAbs = do
     lambdaOp
-    x <- parseVarName
+    x <- parsePattern
     void $ reservedOp ":"
     t <- parseType
     void $ reservedOp "."

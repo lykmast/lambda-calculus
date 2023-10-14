@@ -14,8 +14,9 @@ eval env = go
       v1 <- go t1
       v2 <- go t2
       case (v1, v2) of
-        (Abs x _ty t, yterm) -> go (replace x yterm t)
-        (t1', t2')           -> Left $ evalErrMsg (App t1' t2')
+        (Abs (Identifier x) _ty t,   yterm) -> go (replace x yterm t)
+        (Abs Wildcard       _ty t,  _yterm) -> go t
+        (t1', t2') -> Left $ evalErrMsg (App t1' t2')
     go (Seq t1 t2) = do
       v1 <- go t1
       case v1 of 
@@ -55,9 +56,10 @@ replace :: Var -> Term -> Term -> Term
 replace x yterm (Var x')
   | x' == x   = yterm
   | otherwise =  Var x'
-replace x yterm (Abs x' ty t)
-  | x' == x   = Abs x' ty t
-  | otherwise = Abs x' ty (replace x yterm t)
+replace x yterm (Abs (Identifier x') ty t)
+  | x' == x   = Abs (Identifier x') ty t
+  | otherwise = Abs (Identifier x') ty (replace x yterm t)
+replace x yterm (Abs Wildcard ty t) = Abs Wildcard ty (replace x yterm t)
 replace x yterm (App t1 t2) =
     App (replace x yterm t1) (replace x yterm t2)
 replace x yterm (Seq t1 t2) =

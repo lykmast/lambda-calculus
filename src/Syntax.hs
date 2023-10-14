@@ -12,7 +12,7 @@ data BaseType = BoolT | NatT | UnitT
   deriving (Read, Show)
 
 data Term =
-    Abs Var Type Term
+    Abs Pattern Type Term
   | App Term Term
   | Seq Term Term
   | Var Var
@@ -26,6 +26,9 @@ data Term =
   deriving (Read, Show)
 
 type ConstNat = Int
+
+data Pattern = Identifier Var | Wildcard
+  deriving (Read, Show)
 
 data ConstBool = ConstTrue | ConstFalse
   deriving (Read, Show)
