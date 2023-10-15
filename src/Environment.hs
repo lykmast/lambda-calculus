@@ -1,15 +1,45 @@
-module Environment(Environment, envLookup, envInsert, emptyEnv) where
+module Environment(
+    Environment
+  , termLookup
+  , typeLookup
+  , termInsert
+  , emptyEnv
+  , typeAliasInsert
+  , typeAliasLookup
+  , getTypeAliases
+  , getTermTypes) where
 
 import qualified Data.Map as M
 import Syntax(Type, Term, Var)
 
-type Environment = M.Map Var (Type, Term)
+type TermEnv = M.Map Var (Type, Term)
 
-envLookup :: Environment -> Var -> Maybe (Type, Term)
-envLookup = flip M.lookup
+type TypeEnv = M.Map Var Type
+data Environment = Env {termEnv :: TermEnv, typeEnv :: TypeEnv}
 
-envInsert :: Var -> (Type, Term) -> Environment -> Environment
-envInsert = M.insert
+typeTermLookup :: Environment -> Var -> Maybe (Type, Term)
+typeTermLookup = flip M.lookup . termEnv
+
+termLookup :: Environment -> Var -> Maybe Term
+termLookup env x = snd <$> typeTermLookup env x
+
+termInsert :: Var -> (Type, Term) -> Environment -> Environment
+termInsert x pair env = env{termEnv = M.insert x pair (termEnv env)}
+
+typeLookup :: Environment -> Var -> Maybe Type
+typeLookup env x = fst <$> typeTermLookup env x
+
+typeAliasLookup :: Environment -> Var -> Maybe Type
+typeAliasLookup = flip M.lookup . typeEnv
+
+typeAliasInsert :: Var -> Type -> Environment -> Environment
+typeAliasInsert x ty env = env{typeEnv = M.insert x ty (typeEnv env)}
 
 emptyEnv :: Environment
-emptyEnv = M.empty
+emptyEnv = Env M.empty M.empty
+
+getTermTypes :: Environment -> TypeEnv
+getTermTypes =  fmap fst . termEnv
+
+getTypeAliases :: Environment -> TypeEnv
+getTypeAliases =  typeEnv

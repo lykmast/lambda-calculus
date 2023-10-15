@@ -1,14 +1,14 @@
 module Eval(eval) where
 import Syntax
 import PPrint (qshow)
-import Environment(Environment, envLookup)
+import Environment(Environment, termLookup)
 
 eval :: Environment -> Term -> Either String Term
 eval env = go
   where
     go t@(Var x) =
-      case envLookup env x of
-        Just (_ty, t') -> go t'
+      case termLookup env x of
+        Just t' -> go t'
         Nothing -> Left $ "Unbound variable " ++ qshow t ++ "'."
     go (App t1 t2) = do
       v1 <- go t1

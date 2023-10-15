@@ -6,6 +6,7 @@ type Var = String
 data Type =
     Arr Type Type 
   | Base BaseType
+  | Alias String
   deriving (Read, Show)
 
 data BaseType = BoolT | NatT | UnitT
@@ -34,9 +35,10 @@ data Pattern = Identifier Var | Wildcard
 data ConstBool = ConstTrue | ConstFalse
   deriving (Read, Show)
 
-type Binding = (Var, Term)
+data Binding = TermBind Var Term | TypeBind Var Type
+  deriving (Read, Show)
 
-type TopLevel = Either Term Binding
+data TopLevel = TopTerm Term | TopBind Binding
 
 magnitude :: ConstNat -> Int
 magnitude = id

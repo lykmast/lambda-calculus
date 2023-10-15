@@ -52,11 +52,13 @@ instance PPrint Type where
   pshow (Arr t1 t2)  = pshowArr1 t1 ++ " -> " ++ pshow t2
   pshow (Base BoolT) = "Bool"
   pshow (Base NatT)  = "Nat"
-  pshow (Base UnitT)  = "Unit"
+  pshow (Base UnitT) = "Unit"
+  pshow (Alias x)    = x
 
 pshowArr1 :: Type -> String
-pshowArr1 t@Arr{}  = parenthesize (pshow t)
-pshowArr1 t@Base{} = pshow t
+pshowArr1 t@Arr{}   = parenthesize (pshow t)
+pshowArr1 t@Base{}  = pshow t
+pshowArr1 t@Alias{} = pshow t
 
 qshow :: PPrint a => a -> String
 qshow t = "'" ++ pshow t ++ "'"

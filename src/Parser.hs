@@ -8,6 +8,7 @@ import Control.Monad (void)
 import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
 import Data.Functor (($>))
+import Data.Char (isUpper)
 
 
 theParser :: String -> Either ParseError TopLevel
@@ -17,7 +18,21 @@ lambdaCalculusDefinition =
   emptyDef {
     P.identStart = letter <|> char '_' ,
     P.identLetter = alphaNum <|> char '_' <|> char '\'',
-    P.reservedNames = ["if", "then", "else", "true", "false", "succ", "pred", "iszero", "unit", "Bool", "Nat", "Unit", "as", "_"],
+    P.reservedNames = [
+        "if"
+      , "then"
+      , "else"
+      , "true"
+      , "false"
+      , "succ"
+      , "pred"
+      , "iszero"
+      , "unit"
+      , "Bool"
+      , "Nat"
+      , "Unit"
+      , "as"
+      , "_"],
     P.reservedOpNames = ["->", ".", ":", "λ", "\\", "="]
   }
 
@@ -32,18 +47,30 @@ reserved = P.reserved lexer
 parseVarName :: Parsec Var u Var
 parseVarName = P.identifier lexer
 
+parseTypeName :: Parsec Var u Var
+parseTypeName = do
+  s <- parseVarName
+  if isUpper (head s) then return s else fail "Type name must start with uppercase letter." 
+
 parens :: Parser a -> Parser a
 parens = P.parens lexer
 
 parseTopLevel :: Parser TopLevel
-parseTopLevel = Right <$> try parseBinding <|> Left <$> parseTerm0
+parseTopLevel = TopBind <$> try parseBinding <|> TopTerm <$> parseTerm0
 
 parseBinding :: Parser Binding
-parseBinding = do
-  x <- parseVarName
-  reservedOp "="
-  t <- parseTerm2
-  return (x,t)
+parseBinding = try parseTermBind <|> parseTypeBind
+
+parseTermBind :: Parser Binding
+parseTermBind = TermBind <$> parseVarName <* reservedOp "=" <*> parseTerm0
+
+parseTypeBind :: Parser Binding
+parseTypeBind =
+  -- reserved "type" $> 
+    TypeBind <$> 
+        parseTypeName 
+    <* reservedOp "=" 
+    <*> parseType
 
 parseTerm0 :: Parser Term
 parseTerm0 = chainl1 parseTerm1 (reservedOp ";" $> Seq)
@@ -123,7 +150,10 @@ parseType  = chainr1 parseNonArrow $ do
   return Arr
 
 parseNonArrow :: Parser Type
-parseNonArrow = parens parseType <|> parseBase
+parseNonArrow = parens parseType <|> parseBase <|> parseAlias
+
+parseAlias :: Parser Type
+parseAlias = Alias <$> parseTypeName
 
 parseBase :: Parser Type
 parseBase =

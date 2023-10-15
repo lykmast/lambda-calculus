@@ -14,7 +14,7 @@ extended with:
 ## Syntax
 ```haskell
 -- Bind
-b ::= x = t 
+b ::= x = t | x = T
 
 -- Term
 t ::= x
@@ -37,7 +37,7 @@ p ::= x
     | _
 
 -- Type
-T ::= Bool | Nat | Unit | T1 -> T2
+T ::= Bool | Nat | Unit | T1 -> T2 | x
 ```
 
 ## Interface
@@ -100,6 +100,29 @@ Term 'true'cannot be ascribed with type 'Unit'.
 :: Nat
 λ> unit; iszero 3 as Bool
 false
+:: Bool
+```
+
+- Type aliases:
+```
+λ> UU = Unit -> Unit
+UU = Unit -> Unit
+λ> f = \x: UU. x unit
+λx: UU. x unit
+:: UU -> Unit
+λ> f (\x:Unit. x)
+unit
+:: Unit
+λ> NB = Nat -> Bool
+NB = Nat -> Bool
+λ> my_iszero = (\n:Nat. iszero n) as NB
+λn: Nat. iszero n
+:: NB
+λ> my_iszero 3
+false
+:: Bool
+λ> my_iszero 0
+true
 :: Bool
 ```
 ## Build/Run Instructions
