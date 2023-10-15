@@ -1,7 +1,7 @@
 module Eval(eval) where
 import Syntax
 import PPrint (qshow)
-import Environment(Environment, termLookup)
+import Environment(Environment, termLookup, plainTermInsert)
 
 eval :: Environment -> Term -> Either String Term
 eval env = go
@@ -17,6 +17,10 @@ eval env = go
         (Abs (Identifier x) _ty t,   yterm) -> go (replace x yterm t)
         (Abs Wildcard       _ty t,  _yterm) -> go t
         (t1', t2') -> Left $ evalErrMsg (App t1' t2')
+    go (Let Wildcard t1 t2) = go t1 >> go t2
+    go (Let (Identifier x) t1 t2) = do
+      v1 <- go t1
+      eval (plainTermInsert x v1 env) t2
     go (As t1 _ty) = go t1
     go (Seq t1 t2) = do
       v1 <- go t1
@@ -60,6 +64,10 @@ replace x yterm (Var x')
 replace x yterm (Abs (Identifier x') ty t)
   | x' == x   = Abs (Identifier x') ty t
   | otherwise = Abs (Identifier x') ty (replace x yterm t)
+replace x yterm (Let Wildcard t1 t2) = Let Wildcard (replace x yterm t1) (replace x yterm t2)
+replace x yterm (Let (Identifier x') t1 t2)
+  | x' == x   = Let (Identifier x') (replace x yterm t1) t2
+  | otherwise = Let (Identifier x') (replace x yterm t1) (replace x yterm t2)
 replace x yterm (Abs Wildcard ty t) = Abs Wildcard ty (replace x yterm t)
 replace x yterm (App t1 t2) =
     App (replace x yterm t1) (replace x yterm t2)

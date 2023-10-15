@@ -22,6 +22,8 @@ lambdaCalculusDefinition =
         "if"
       , "then"
       , "else"
+      , "let"
+      , "in"
       , "true"
       , "false"
       , "succ"
@@ -93,6 +95,7 @@ parseNonApp =
   <|> parsePred
   <|> parseIsZero
   <|> parseIfThenElse
+  <|> parseLet
   <|> parseAbs
   <|> parseVar
   <|> parens parseTerm0
@@ -105,6 +108,16 @@ parseIfThenElse = do
   t2 <- parseTerm1
   reserved "else"
   IfThenElse t1 t2 <$> parseTerm1
+
+parseLet :: Parser Term
+parseLet = do
+  reserved "let"
+  p <- parsePattern
+  reservedOp "="
+  t1 <- parseTerm1
+  reserved "in"
+  Let p t1 <$> parseTerm1
+
 
 parseSucc :: Parser Term
 parseSucc = reserved "succ" *> (Succ <$> parseTerm2)

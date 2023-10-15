@@ -15,6 +15,7 @@ data BaseType = BoolT | NatT | UnitT
 data Term =
     Abs Pattern Type Term
   | App Term Term
+  | Let Pattern Term Term
   | Seq Term Term
   | As  Term Type
   | Var Var

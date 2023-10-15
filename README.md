@@ -20,6 +20,7 @@ b ::= x = t | x = T
 t ::= x
     | λp: T. t
     | \p: T. t -- same with using λ.
+    | let p = t1 in t2
     | t1 t2
     | t as T
     | t1; t2

@@ -9,10 +9,10 @@ typecheck c (Var x) =
     case varTypeLookup c x of
       Just t -> Right t
       Nothing -> Left $ "No " ++ qshow (Var x)  ++ " in type context."
-typecheck c (Abs x ty t) =
-  let c' =  case x of
-              Identifier name -> insertVarType name ty c
-              Wildcard        -> c
+typecheck c (Abs p ty t) =
+  let c' =  case p of
+              Identifier x -> insertVarType x ty c
+              Wildcard     -> c
   in Arr ty <$> typecheck c' t
 typecheck c (App t1 t2)  = do
     ty1 <- typecheck c t1
@@ -20,7 +20,13 @@ typecheck c (App t1 t2)  = do
     case toArrType c ty1 of
       Just (ty11, ty12) | typeEq c ty11 ty2 -> return ty12
       _ -> Left $ "Term " ++ qshow t1  ++ " with type " ++ qshow ty1 ++ 
-                  " cannot be applied to " ++ qshow t2  ++ " with type " ++ qshow ty2  ++ "."  
+                  " cannot be applied to " ++ qshow t2  ++ " with type " ++ qshow ty2  ++ "."
+typecheck c (Let p t1 t2) = do
+  ty <- typecheck c t1
+  let c' =  case p of
+              Identifier x -> insertVarType x ty c
+              Wildcard     -> c
+  typecheck c' t2
 typecheck c t@(Seq t1 t2) = do
   ty1 <- typecheck c t1
   ty2 <- typecheck c t2
