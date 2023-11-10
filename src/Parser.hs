@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
-module Parser(theParser) where
+module Parser(theParser, parseType, parseTerm0, stringParse) where
 
 import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum)
 import Text.Parsec (Parsec, ParseError, try)
@@ -10,6 +10,8 @@ import Text.Parsec.Language (emptyDef)
 import Data.Functor (($>))
 import Data.Char (isUpper)
 
+stringParse :: Parser a -> String -> Either ParseError a
+stringParse p = parse (p <* eof) ""
 
 theParser :: String -> Either ParseError TopLevel
 theParser = parse (parseTopLevel <* eof) ""
@@ -52,7 +54,7 @@ parseVarName = P.identifier lexer
 parseTypeName :: Parsec Var u Var
 parseTypeName = do
   s <- parseVarName
-  if isUpper (head s) then return s else fail "Type name must start with uppercase letter." 
+  if isUpper (head s) then return s else fail "Type name must start with uppercase letter."
 
 parens :: Parser a -> Parser a
 parens = P.parens lexer
@@ -75,53 +77,69 @@ parseTermBind = TermBind <$> parseVarName <* reservedOp "=" <*> parseTerm0
 parseTypeBind :: Parser Binding
 parseTypeBind =
   -- reserved "type" $> 
-    TypeBind <$> 
-        parseTypeName 
-    <* reservedOp "=" 
+    TypeBind <$>
+        parseTypeName
+    <* reservedOp "="
     <*> parseType
 
 parseTerm0 :: Parser Term
-parseTerm0 = chainl1 parseTerm1 (reservedOp ";" $> Seq)
+parseTerm0 = chainl1 parseNonSeq (reservedOp ";" $> Seq)
 
-parseTerm1 :: Parser Term
-parseTerm1 = try parseAs <|> parseTerm2
+parseAbsSubterm :: Parser Term
+parseAbsSubterm = parseNonSeq
 
-parseAs :: Parser Term
-parseAs = As <$> parseTerm2 <* reserved "as" <*> parseType
+parseNonSeq :: Parser Term
+parseNonSeq = try parseAs <|> parseAbslikeTerm
+  where 
+    parseAs :: Parser Term
+    parseAs = As <$> parseAbslikeTerm <* reserved "as" <*> parseType
 
-parseTerm2 :: Parser Term
-parseTerm2 = chainl1 parseNonApp (return App)
+parseAbslikeTerm :: Parser Term
+parseAbslikeTerm =
+      parseLet
+  <|> parseIfThenElse
+  <|> parseAbs
+  <|> parseApplikeTerm
 
-parseNonApp :: Parser Term
-parseNonApp =
+parseApplikeTerm :: Parser Term
+parseApplikeTerm =
+      try parseSucc
+  <|> try parsePred
+  <|> try parseIsZero
+  <|> chainl1 parseAppSubterm (return App)
+
+parseAppSubterm :: Parser Term
+parseAppSubterm =
+      try parseProj1
+  <|> try parseProj2
+  <|> parseAtomTerm
+
+parseAtomTerm :: Parser Term
+parseAtomTerm = 
       parseConstB
   <|> parseConstN
   <|> parseUnit
-  <|> parseSucc
-  <|> parsePred
-  <|> parseIsZero
-  <|> parseIfThenElse
-  <|> parseLet
-  <|> parseAbs
   <|> parseVar
+  <|> parsePair
   <|> parens parseTerm0
 
 parseIfThenElse :: Parser Term
 parseIfThenElse = do
   reserved "if"
-  t1 <- parseTerm1
+  t1 <- parseAbsSubterm
   reserved "then"
-  t2 <- parseTerm1
+  t2 <- parseAbsSubterm
   reserved "else"
-  IfThenElse t1 t2 <$> parseTerm1
+  IfThenElse t1 t2 <$> parseAbsSubterm
 
 parseLet :: Parser Term
 parseLet = do
   reserved "let"
   p <- parsePattern
   reservedOp "="
-  t1 <- parseTerm1
+  t1 <- parseAbsSubterm
   reserved "in"
+  Let p t1 <$> parseAbsSubterm
 
 parsePair :: Parser Term
 parsePair = uncurry Pair <$> braces parsePairTerms
@@ -129,15 +147,20 @@ parsePair = uncurry Pair <$> braces parsePairTerms
 parsePairTerms :: Parser (Term, Term)
 parsePairTerms = (,) <$> parseTerm0 <* comma <*> parseTerm0
 
+parseProj1 :: Parser Term
+parseProj1 = Proj1 <$> parseAtomTerm <* reservedOp ".1"
+
+parseProj2 :: Parser Term
+parseProj2 = Proj2 <$> parseAtomTerm <* reservedOp ".2"
 
 parseSucc :: Parser Term
-parseSucc = reserved "succ" *> (Succ <$> parseTerm2)
+parseSucc = reserved "succ" *> (Succ <$> parseAppSubterm)
 
 parsePred :: Parser Term
-parsePred = reserved "pred" *> (Pred <$> parseTerm2)
+parsePred = reserved "pred" *> (Pred <$> parseAppSubterm)
 
 parseIsZero :: Parser Term
-parseIsZero = reserved "iszero" *> (IsZero <$> parseTerm2)
+parseIsZero = reserved "iszero" *> (IsZero <$> parseAppSubterm)
 
 parseVar :: Parser Term
 parseVar = Var <$> parseVarName
@@ -163,18 +186,23 @@ parseAbs = do
     void $ reservedOp ":"
     t <- parseType
     void $ reservedOp "."
-    Abs x t <$> parseTerm1
+    Abs x t <$> parseAbsSubterm
   where
     lambdaOp :: Parser ()
     lambdaOp = void $ reservedOp "λ" <|> reservedOp "\\"
 
 parseType :: Parser Type
-parseType  = chainr1 parseNonArrow $ do
+parseType  = chainr1 parseType1 $ do
   reservedOp "->"
   return Arr
 
-parseNonArrow :: Parser Type
-parseNonArrow = parens parseType <|> parseBase <|> parseAlias
+parseType1 :: Parser Type
+parseType1 = chainl1 parseType2 $ do
+  parsePairX
+  return PairT
+
+parseType2 :: Parser Type
+parseType2 = parens parseType <|> parseBase <|> parseAlias <|> parsePairT
 
 parseAlias :: Parser Type
 parseAlias = Alias <$> parseTypeName
@@ -184,3 +212,10 @@ parseBase =
       reserved "Bool" $> Base BoolT
   <|> reserved "Nat"  $> Base NatT
   <|> reserved "Unit" $> Base UnitT
+
+
+parsePairX :: Parser ()
+parsePairX = reservedOp "\215"
+
+parsePairT :: Parser Type
+parsePairT = PairT <$> parseType <* parsePairX <*> parseType
