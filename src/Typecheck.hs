@@ -21,6 +21,22 @@ typecheck c (App t1 t2)  = do
       Just (ty11, ty12) | typeEq c ty11 ty2 -> return ty12
       _ -> Left $ "Term " ++ qshow t1  ++ " with type " ++ qshow ty1 ++ 
                   " cannot be applied to " ++ qshow t2  ++ " with type " ++ qshow ty2  ++ "."
+typecheck c (Pair t1 t2) = do
+    ty1 <- typecheck c t1
+    ty2 <- typecheck c t2
+    return (PairT ty1 ty2)
+typecheck c t@(Proj1 t1) = do
+    ty1  <- typecheck c t1
+    case toPairType c ty1 of
+      Just (ty11, _ty12) -> Right ty11
+      Nothing            -> Left $ "Term " ++ qshow t1 ++ " should be of type " ++ 
+                                    qshow (PairT (Alias "'a") (Alias "'b")) ++ " in " ++ qshow t 
+typecheck c t@(Proj2 t1) = do
+    ty1  <- typecheck c t1
+    case toPairType c ty1 of
+      Just (_ty11, ty12) -> Right ty12
+      Nothing            -> Left $ "Term " ++ qshow t1 ++ " should be of type " ++ 
+                                    qshow (PairT (Alias "'a") (Alias "'b")) ++ " in " ++ qshow t
 typecheck c (Let p t1 t2) = do
   ty <- typecheck c t1
   let c' =  case p of
@@ -81,6 +97,7 @@ typeEq c  ty1           (Alias x) =
       Nothing  -> False
       Just ty2 -> typeEq c ty1 ty2
 typeEq c  (Arr t11 t12) (Arr t21 t22) = typeEq c t11 t21 && typeEq c t12 t22
+typeEq c  (PairT t11 t12) (PairT t21 t22) = typeEq c t11 t21 && typeEq c t12 t22
 typeEq _c (Base BoolT)  (Base BoolT)  = True
 typeEq _c (Base NatT)   (Base NatT)   = True
 typeEq _c (Base UnitT)  (Base UnitT)  = True
@@ -88,9 +105,15 @@ typeEq _c (Base UnitT)  (Base UnitT)  = True
 typeEq _c (Base BoolT)   _            = False
 typeEq _c (Base NatT)    _            = False
 typeEq _c (Base UnitT)   _            = False
-typeEq _c Arr{}          Base{}       = False
+typeEq _c Arr{}          _            = False
+typeEq _c PairT{}        _            = False
 
 toArrType :: Context -> Type -> Maybe (Type, Type)
 toArrType _c (Arr t1 t2) = Just (t1, t2)
 toArrType c  (Alias x)   = toArrType c =<< typeAliasLookup c x 
 toArrType _c _ty         = Nothing
+
+toPairType :: Context -> Type -> Maybe (Type, Type)
+toPairType _c (PairT t1 t2) = Just (t1, t2)
+toPairType c  (Alias x)   = toPairType c =<< typeAliasLookup c x 
+toPairType _c _ty         = Nothing

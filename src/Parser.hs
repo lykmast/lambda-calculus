@@ -35,7 +35,7 @@ lambdaCalculusDefinition =
       , "Unit"
       , "as"
       , "_"],
-    P.reservedOpNames = ["->", ".", ":", "λ", "\\", "="]
+    P.reservedOpNames = ["->", ".", ":", "λ", "\\", "=", ".1", ".2"]
   }
 
 lexer = P.makeTokenParser lambdaCalculusDefinition
@@ -56,6 +56,12 @@ parseTypeName = do
 
 parens :: Parser a -> Parser a
 parens = P.parens lexer
+
+braces :: Parser a -> Parser a
+braces = P.braces lexer
+
+comma :: Parser ()
+comma = void (P.comma lexer)
 
 parseTopLevel :: Parser TopLevel
 parseTopLevel = TopBind <$> try parseBinding <|> TopTerm <$> parseTerm0
@@ -116,7 +122,12 @@ parseLet = do
   reservedOp "="
   t1 <- parseTerm1
   reserved "in"
-  Let p t1 <$> parseTerm1
+
+parsePair :: Parser Term
+parsePair = uncurry Pair <$> braces parsePairTerms
+
+parsePairTerms :: Parser (Term, Term)
+parsePairTerms = (,) <$> parseTerm0 <* comma <*> parseTerm0
 
 
 parseSucc :: Parser Term

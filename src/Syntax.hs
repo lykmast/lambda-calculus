@@ -7,7 +7,7 @@ data Type =
     Arr Type Type 
   | Base BaseType
   | Alias String
-  deriving (Read, Show)
+  | PairT Type Type
 
 data BaseType = BoolT | NatT | UnitT
   deriving (Read, Show)
@@ -21,6 +21,9 @@ data Term =
   | Var Var
   | ConstB ConstBool
   | ConstN ConstNat
+  | Pair Term Term
+  | Proj1 Term
+  | Proj2 Term
   | IfThenElse Term Term Term
   | Pred Term
   | Succ Term

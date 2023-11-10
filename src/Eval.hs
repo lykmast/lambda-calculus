@@ -33,6 +33,20 @@ eval env = go
         ConstB ConstTrue -> go t2
         ConstB ConstFalse -> go t3
         _ -> Left $ evalErrMsg (IfThenElse v1 t2 t3)
+    go (Pair t1 t2) = do
+      v1 <- go t1
+      v2 <- go t2
+      return (Pair v1 v2)
+    go (Proj1 t) = do
+      v <- go t
+      case v of 
+        Pair v1 _ -> Right v1
+        _         -> Left $ evalErrMsg (Proj1 v)
+    go (Proj2 t) = do
+      v <- go t
+      case v of 
+        Pair _ v2 -> Right v2
+        _         -> Left $ evalErrMsg (Proj2 v)
     go (Succ t) = do
       v <- go t
       case v of
@@ -76,6 +90,9 @@ replace x yterm (Seq t1 t2) =
     Seq (replace x yterm t1) (replace x yterm t2)
 replace x yterm (IfThenElse t1 t2 t3) =
     IfThenElse (replace x yterm t1) (replace x yterm t2) (replace x yterm t3)
+replace x yterm (Pair t1 t2) = Pair (replace x yterm t1) (replace x yterm t2)
+replace x yterm (Proj1 t) = Proj1 (replace x yterm t)
+replace x yterm (Proj2 t) = Proj2 (replace x yterm t)
 replace x yterm (Succ t) = Succ (replace x yterm t)
 replace x yterm (Pred t) = Pred (replace x yterm t)
 replace x yterm (IsZero t) = IsZero (replace x yterm t)
