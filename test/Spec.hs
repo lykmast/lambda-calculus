@@ -1,2 +1,5 @@
+import ParseSpec(term_props)
+import Hedgehog (check)
+
 main :: IO ()
-main = putStrLn "Test suite not yet implemented"
+main = mapM_ check term_props

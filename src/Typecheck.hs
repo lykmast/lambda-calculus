@@ -1,4 +1,4 @@
-module Typecheck(typecheck) where
+module Typecheck(typecheck, typeEq) where
 
 import Syntax
 import PPrint (qshow)

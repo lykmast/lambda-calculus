@@ -3,7 +3,9 @@ module Context(
   , varTypeLookup
   , typeAliasLookup
   , insertVarType
-  , fromEnvironment) where
+  , fromEnvironment
+  , empty
+  ) where
 
 import Syntax ( Type, Var )
 import Environment (getTermTypes, getTypeAliases, Environment)
@@ -22,3 +24,6 @@ insertVarType x ty c = c{varTypes = M.insert x ty (varTypes c)}
 
 fromEnvironment :: Environment -> Context
 fromEnvironment env = Context {varTypes = getTermTypes env, typeAliases = getTypeAliases env}
+
+empty :: Context
+empty = Context M.empty M.empty

@@ -8,9 +8,10 @@ data Type =
   | Base BaseType
   | Alias String
   | PairT Type Type
+  deriving (Eq, Read, Show)
 
 data BaseType = BoolT | NatT | UnitT
-  deriving (Read, Show)
+  deriving (Eq, Read, Show)
 
 data Term =
     Abs Pattern Type Term
@@ -29,20 +30,21 @@ data Term =
   | Succ Term
   | IsZero Term
   | Unit
-  deriving (Read, Show)
+  deriving (Eq, Read, Show)
 
 type ConstNat = Int
 
 data Pattern = Identifier Var | Wildcard
-  deriving (Read, Show)
+  deriving (Eq, Read, Show)
 
 data ConstBool = ConstTrue | ConstFalse
-  deriving (Read, Show)
+  deriving (Eq, Read, Show)
 
 data Binding = TermBind Var Term | TypeBind Var Type
-  deriving (Read, Show)
+  deriving (Eq, Read, Show)
 
 data TopLevel = TopTerm Term | TopBind Binding
+  deriving (Eq, Read, Show)
 
 magnitude :: ConstNat -> Int
 magnitude = id
