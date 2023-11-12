@@ -8,7 +8,7 @@ Developed while reading through
 The interpreter currently supports terms of the 
 [simply typed lambda calculus](https://en.wikipedia.org/wiki/Simply_typed_lambda_calculus) 
 extended with:
-- `Bool`s, `Nat`s and `Unit`
+- `Bool`s, `Nat`s, `Unit` and tuples.
 - top level bindings, in the form: `x = t`
 
 ## Syntax
@@ -38,7 +38,13 @@ p ::= x
     | _
 
 -- Type
-T ::= Bool | Nat | Unit | T1 -> T2 | x
+T ::= Bool 
+    | Nat 
+    | Unit 
+    | T1 -> T2 
+    | x 
+    | T × T 
+    | {T, T} -- same as with ×
 ```
 
 ## Interface
@@ -126,5 +132,36 @@ false
 true
 :: Bool
 ```
+
+- Tuples
+```
+λ> {{1,2},{3,4}}.2.1
+3
+:: Nat
+λ> {{1,2},{3,4}}.1.2.1.2
+Type error:
+Term '{{1, 2}, {3, 4}}.1.2' should be of type 'a × b' in '{{1, 2}, {3, 4}}.1.2.1'
+λ> ft = {\x:{Bool, Nat}. if x.1 then succ x.2 else pred x.2, \n:Nat. {iszero n, pred n}}
+{λx: Bool × Nat. if x.1 then succ x.2 else pred x.2, λn: Nat. {iszero n, pred n}}
+:: (Bool × Nat -> Nat) × (Nat -> Bool × Nat)
+λ> ft.1 {true, 1}
+2
+:: Nat
+λ> ft.1 {false, 2}
+1
+:: Nat
+λ> ft.2 1
+{false, 0}
+:: Bool × Nat
+λ> ft.1 (ft.2 0)
+Eval error:
+Can't evaluate 'pred 0'.
+λ> ft.1 (ft.2 4)
+2
+:: Nat
+```
 ## Build/Run Instructions
 Just run `stack run` in the root directory. If you want to just build the project you can run `stack build` instead.
+
+## Testing
+Run `stack test` in the root directory. Testing is implemented with [Hedgehog](https://hedgehog.qa/)
