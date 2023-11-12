@@ -218,4 +218,6 @@ parsePairX :: Parser ()
 parsePairX = reservedOp "\215"
 
 parsePairT :: Parser Type
-parsePairT = PairT <$> parseType <* parsePairX <*> parseType
+parsePairT =
+      uncurry PairT <$> braces ((,) <$> parseType <* comma <*> parseType)
+  <|> PairT <$> parseType <* parsePairX <*> parseType
