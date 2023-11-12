@@ -64,8 +64,8 @@ pshowAppLike (App t1 t2) = pshowAppLike t1 ++ " " ++ pshowAppSubterm t2
 pshowAppLike t           = pshowAppSubterm t
 
 pshowAppSubterm :: Term -> String
-pshowAppSubterm (Proj1 t) = pshowAtomTerm t ++ ".1"
-pshowAppSubterm (Proj2 t) = pshowAtomTerm t ++ ".2"
+pshowAppSubterm (Proj1 t) = pshowAppSubterm t ++ ".1"
+pshowAppSubterm (Proj2 t) = pshowAppSubterm t ++ ".2"
 pshowAppSubterm t         = pshowAtomTerm t
 
 pshowAtomTerm :: Term -> String

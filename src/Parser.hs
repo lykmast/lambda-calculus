@@ -1,7 +1,7 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 module Parser(theParser, parseType, parseTerm0, stringParse) where
 
-import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum)
+import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum, string, optional)
 import Text.Parsec (Parsec, ParseError, try)
 import Syntax
 import Control.Monad (void)
@@ -9,6 +9,8 @@ import qualified Text.Parsec.Token as P
 import Text.Parsec.Language (emptyDef)
 import Data.Functor (($>))
 import Data.Char (isUpper)
+import Control.Applicative ((<**>))
+import Text.Parsec.Token (GenTokenParser(whiteSpace))
 
 stringParse :: Parser a -> String -> Either ParseError a
 stringParse p = parse (p <* eof) ""
@@ -37,7 +39,7 @@ lambdaCalculusDefinition =
       , "Unit"
       , "as"
       , "_"],
-    P.reservedOpNames = ["->", ".", ":", "λ", "\\", "=", ".1", ".2"]
+    P.reservedOpNames = ["->", ".", ":", "λ", "\\", "=", ".1", ".2", "\215"]
   }
 
 lexer = P.makeTokenParser lambdaCalculusDefinition
@@ -108,10 +110,13 @@ parseApplikeTerm =
   <|> try parseIsZero
   <|> chainl1 parseAppSubterm (return App)
 
+parsePostfixLeft :: Parser Term -> Parser (Term -> Term) -> Parser Term
+parsePostfixLeft p op = p <**> go 
+  where go = (flip (.) <$> op) <*> (go <|> return id)
+
 parseAppSubterm :: Parser Term
 parseAppSubterm =
-      try parseProj1
-  <|> try parseProj2
+  try (parseAtomTerm `parsePostfixLeft` parseProjOp)
   <|> parseAtomTerm
 
 parseAtomTerm :: Parser Term
@@ -147,11 +152,12 @@ parsePair = uncurry Pair <$> braces parsePairTerms
 parsePairTerms :: Parser (Term, Term)
 parsePairTerms = (,) <$> parseTerm0 <* comma <*> parseTerm0
 
-parseProj1 :: Parser Term
-parseProj1 = Proj1 <$> parseAtomTerm <* reservedOp ".1"
-
-parseProj2 :: Parser Term
-parseProj2 = Proj2 <$> parseAtomTerm <* reservedOp ".2"
+parseProjOp :: Parser (Term -> Term)
+parseProjOp = tokenize $ 
+    try (Proj1 <$ string ".1") <|>  Proj2 <$ string ".2"
+  where
+    tokenize p    = optWhitespace *> p <* optWhitespace 
+    optWhitespace = optional (whiteSpace lexer)
 
 parseSucc :: Parser Term
 parseSucc = reserved "succ" *> (Succ <$> parseAppSubterm)
