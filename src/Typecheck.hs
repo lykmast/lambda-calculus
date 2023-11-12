@@ -1,8 +1,11 @@
-module Typecheck(typecheck, typeEq) where
+module Typecheck(typecheck, typeEq, typecheckNoContext) where
 
 import Syntax
 import PPrint (qshow)
-import Context(Context, varTypeLookup, typeAliasLookup, insertVarType)
+import Context(empty, Context, varTypeLookup, typeAliasLookup, insertVarType)
+
+typecheckNoContext :: Term -> Either String Type
+typecheckNoContext = typecheck empty
 
 typecheck :: Context -> Term -> Either String Type
 typecheck c (Var x) =

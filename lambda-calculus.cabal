@@ -64,6 +64,7 @@ test-suite lambda-calculus-test
   other-modules:
       ParseSpec
       TermGen
+      TermGenSpec
       TestContext
       TypeGen
       Paths_lambda_calculus

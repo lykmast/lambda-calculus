@@ -1,4 +1,4 @@
-module TermGen(genTerm) where
+module TermGen(genTerm, genTermTypePair) where
 
 import Hedgehog ( Gen )
 import Hedgehog.Gen (element, int, choice, subterm, subterm2, subterm3, recursive, small, prune)
@@ -14,7 +14,10 @@ genType :: Gen Type
 genType = iterate small T.genType !! 3
 
 genTerm :: Gen Term
-genTerm = fst <$> genFromContext empty
+genTerm = fst <$> genTermTypePair
+
+genTermTypePair :: Gen (Term, Type)
+genTermTypePair = genFromContext empty
 
 genFromContext :: Context -> Gen (Term, Type)
 genFromContext ctx = do
