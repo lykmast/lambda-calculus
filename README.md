@@ -164,4 +164,4 @@ Can't evaluate 'pred 0'.
 Just run `stack run` in the root directory. If you want to just build the project you can run `stack build` instead.
 
 ## Testing
-Run `stack test` in the root directory. Testing is implemented with [Hedgehog](https://hedgehog.qa/)
+Run `stack test` in the root directory. Testing is implemented with [Hedgehog](https://hedgehog.qa/).
