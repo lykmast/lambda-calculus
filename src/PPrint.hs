@@ -57,9 +57,9 @@ pshowAbsLike (IfThenElse t1 t2 t3)  = pshowIfThenElse t1 t2 t3
 pshowAbsLike t                      = pshowAppLike t
 
 pshowAppLike :: Term -> String
-pshowAppLike (Succ t)    = "succ"   ++ pshowAppSubterm t
-pshowAppLike (Pred t)    = "pred"   ++ pshowAppSubterm t
-pshowAppLike (IsZero t)  = "iszero" ++ pshowAppSubterm t
+pshowAppLike (Succ t)    = "succ "   ++ pshowAppSubterm t
+pshowAppLike (Pred t)    = "pred "   ++ pshowAppSubterm t
+pshowAppLike (IsZero t)  = "iszero " ++ pshowAppSubterm t
 pshowAppLike (App t1 t2) = pshowAppLike t1 ++ " " ++ pshowAppSubterm t2
 pshowAppLike t           = pshowAppSubterm t
 
