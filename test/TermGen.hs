@@ -95,9 +95,6 @@ genLetWithType ctx ty = do
       t2 = genTermWithType newCtx ty
   subterm2 t1 t2 (Let p)
 
-genPairWithType :: Context -> Type -> Type  -> Gen Term
-genPairWithType = genPairWithTermGen genTermWithType
-
 type TermGenFunc = Context -> Type -> Gen Term
 genAbsWithTermGen :: TermGenFunc -> Context -> Type -> Type -> Gen Term
 genAbsWithTermGen genT ctx ty1 ty2 = do
@@ -110,9 +107,6 @@ genAbsWithTermGen genT ctx ty1 ty2 = do
 genPairWithTermGen :: TermGenFunc -> Context -> Type -> Type -> Gen Term
 genPairWithTermGen genT ctx ty1 ty2 = subterm2 (genT ctx ty1) (genT ctx ty2) Pair
 
-genAbsWithType :: Context -> Type -> Type -> Gen Term
-genAbsWithType = genAbsWithTermGen genTermWithType
-  
 subterm2WithType :: Context -> Type -> Type -> (Term -> Term -> Term) -> Gen Term
 subterm2WithType ctx ty1 ty2 = subterm2 (genTermWithType ctx ty1) (genTermWithType ctx ty2)
 
