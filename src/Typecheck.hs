@@ -30,7 +30,7 @@ typecheck c t@(Proj1 t1) = do
     case toPairType c ty1 of
       Just (ty11, _ty12) -> Right ty11
       Nothing            -> Left $ "Term " ++ qshow t1 ++ " should be of type " ++ 
-                                    qshow (PairT (Alias "'a") (Alias "'b")) ++ " in " ++ qshow t 
+                                    qshow (PairT (Alias "a") (Alias "b")) ++ " in " ++ qshow t 
 typecheck c t@(Proj2 t1) = do
     ty1  <- typecheck c t1
     case toPairType c ty1 of
