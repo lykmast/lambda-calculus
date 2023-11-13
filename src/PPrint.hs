@@ -1,4 +1,4 @@
-module PPrint(pshow, pprint, qshow) where
+module PPrint(pshow, pprint, qshow, PPrint) where
 import Syntax
 
 class PPrint a where
@@ -41,6 +41,16 @@ instance PPrint Pattern where
   pshow (Identifier x) = x
   pshow Wildcard       = "_"
 
+instance PPrint TopLevel where
+  pshow (TopTerm t) = pshow t
+  pshow (TopBind b) = pshow b
+
+instance PPrint Binding where
+  pshow (TermBind v t) = pshowBindVar v ++ pshow t
+  pshow (TypeBind v t) = pshowBindVar v ++ pshow t
+
+pshowBindVar :: String -> String
+pshowBindVar v = v ++ " = "
 
 pshowSeq :: Term -> String
 pshowSeq (Seq t1 t2) = pshowSeq t1 ++ "; " ++ pshowNonSeq t2
@@ -89,3 +99,4 @@ pshowLet p t1 t2 = "let " ++ pshow p ++ " = " ++ pshowNonSeq t1 ++ " in " ++ psh
 
 pshowAs :: Term -> Type -> String
 pshowAs t ty = pshowAppLike t ++ " as " ++ pshow ty
+

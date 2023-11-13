@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
-module Parser(theParser, parseType, parseTerm0, stringParse) where
+module Parser(theParser, parseTopLevel, parseType, parseTerm0, stringParse) where
 
 import Text.ParserCombinators.Parsec(parse, Parser, char, (<|>), eof, letter, chainl1, chainr1, alphaNum, string, optional)
 import Text.Parsec (Parsec, ParseError, try)
